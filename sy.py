@@ -51,28 +51,43 @@ def shuntingYard(string):
     output = []
     stack = []
     funct = ""
+    digit = ""
     i= 0
     
     while i < len(string):
         functionAdd = False
+        digitAdd = False
         currChar = string[i]
         
         if currChar == " ":
             continue
         elif currChar.isdigit():
-            output.append(currChar)
+            tempChar = currChar
+            if i == len(string)-1:
+                digit += tempChar
+            else:
+                while tempChar.isdigit():
+                    digit += tempChar
+                    i += 1
+                    digitAdd == True
+                    if i == len(string)-1:
+                       break
+                    else:
+                       tempChar = string[i]
+                i -= 1
+            output.append(digit)
+            digit = ""
         elif currChar.isalpha():
             tempChar = currChar
             while tempChar.isalpha():
                 funct += tempChar
                 i += 1
                 tempChar = string[i]
+            i -= 1
             if funct in functions:
                 stack.append(funct)
                 functionAdd = True
                 funct = ""
-                
-            
         elif currChar in operators:
             
             op1 = currChar
@@ -102,8 +117,9 @@ def shuntingYard(string):
         else:
             raise Exception("Unknown token: ", currChar)
             
-        if(functionAdd == False):
+        if(functionAdd == False and digitAdd == False):
             i += 1
+            
     while len(stack) > 0:
         temp = stack.pop()
         if temp == "(" or temp == ")":
@@ -111,5 +127,7 @@ def shuntingYard(string):
         output.append(temp)
     return " ".join(output)
                 
-print(shuntingYard("sin21"))           
+print(shuntingYard("sin(50*2)"))           
                 
+
+

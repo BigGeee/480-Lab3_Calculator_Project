@@ -5,8 +5,13 @@ Created on Wed Oct 27 20:25:22 2021
 @author: georg
 """
 
-operators = {"+","-","*","/","^","~"}
-functions = { 
+operators = {
+        "+",
+        "-",
+        "*",
+        "/",
+        "^",
+        "~",
         "sin",
         "cos",
         "tan",
@@ -17,31 +22,45 @@ functions = {
         "arcctn",
         "log",
         "ln"
+        "."
         }
 leftAsscoc = {"+","-","*","/"}
-rightAssoc = {"~"}
+rightAssoc = {
+        "~",
+        "."
+        "sin",
+        "cos",
+        "tan",
+        "cot",
+        "arcsin",
+        "arccos",
+        "arctan",
+        "arcctn",
+        "log",
+        "ln"}
 
 priority = {
     
-        "~": 4,
-        "(": 3,
-        ")": 3,
+        "~": 4, #negative operator
+        ".": 4,
+        "(": 4,
+        ")": 4,
         "^": 3,
-        "sin": 3,
-        "cos": 3,
-        "tan": 3,
-        "cot": 3,
-        "arcsin": 3,
-        "arccos": 3,
-        "arctan": 3,
-        "arcctn": 3,
-        "log": 3,
-        "ln": 3,
+        "sin":2,
+        "cos":2,
+        "tan":2,
+        "cot":2,
+        "arcsin":2,
+        "arccos":2,
+        "arctan":2,
+        "arcctn":2,
+        "log":2,
+        "ln":2,
         "*": 2,
         "/": 2,
-        "%": 2,
         "+": 1,
         "-": 1,
+        
 }
 
 
@@ -57,8 +76,8 @@ def shuntingYard(string):
     while i < len(string):
         functionAdd = False
         digitAdd = False
+        decFound = False
         currChar = string[i]
-        
         if currChar == " ":
             continue
         elif currChar.isdigit():
@@ -66,35 +85,47 @@ def shuntingYard(string):
             if i == len(string)-1:
                 digit += tempChar
             else:
-                while tempChar.isdigit():
+                while tempChar.isdigit() or tempChar == ".":
+                    if tempChar == "." and decFound == True:
+                        raise Exception("Error: Nested Decimal Found")
+                    if tempChar == "." and decFound == False:
+                        decFound = True
                     digit += tempChar
                     i += 1
                     digitAdd == True
-                    if i == len(string)-1:
+                    if i == len(string):
                        break
                     else:
                        tempChar = string[i]
-                i -= 1
+                i -= 1 # i dont know why but this makes the program work
+                
             output.append(digit)
             digit = ""
+            decFound = False
+            
         elif currChar.isalpha():
             tempChar = currChar
             while tempChar.isalpha():
                 funct += tempChar
                 i += 1
-                tempChar = string[i]
-            i -= 1
-            if funct in functions:
+                if i == len(string)-1:
+                    break
+                else:
+                    tempChar = string[i]
+            print(funct)
+            if funct in operators:
                 stack.append(funct)
                 functionAdd = True
                 funct = ""
+            else:
+                raise Exception("Error: Unknown Fucntion!")
+                
         elif currChar in operators:
             
             op1 = currChar
             
             while len(stack) > 0:
-                op2 = stack[-1]
-                
+                op2 = stack[-1]  
                 if op2 in operators and (op1 in leftAsscoc and (priority[op1] <= priority[op2])) or (op1 in rightAssoc and (priority[op1] < priority[op2])):
                     output.append(stack.pop())
                 else:
@@ -125,9 +156,10 @@ def shuntingYard(string):
         if temp == "(" or temp == ")":
             raise Exception("Parenthesis mismatched")
         output.append(temp)
-    return " ".join(output)
+    return output
                 
-print(shuntingYard("sin(50*2)"))           
+print(shuntingYard("8.3+1"))           
                 
+print(shuntingYard("1+8.3")) 
 
 

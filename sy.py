@@ -5,6 +5,8 @@ Created on Wed Oct 27 20:25:22 2021
 @author: georg
 """
 
+import math
+
 operators = {
         "+",
         "-",
@@ -21,13 +23,10 @@ operators = {
         "arctan",
         "arcctn",
         "log",
-        "ln"
-        "."
+        "ln",
         }
-leftAsscoc = {"+","-","*","/"}
-rightAssoc = {
+functions = {
         "~",
-        "."
         "sin",
         "cos",
         "tan",
@@ -37,7 +36,22 @@ rightAssoc = {
         "arctan",
         "arcctn",
         "log",
-        "ln"}
+        "ln",
+    }
+leftAsscoc = {"+","-","*","/"}
+rightAssoc = {
+        "~",
+        "sin",
+        "cos",
+        "tan",
+        "cot",
+        "arcsin",
+        "arccos",
+        "arctan",
+        "arcctn",
+        "log",
+        "ln"
+        }
 
 priority = {
     
@@ -80,7 +94,7 @@ def shuntingYard(string):
         currChar = string[i]
         if currChar == " ":
             continue
-        elif currChar.isdigit():
+        elif currChar.isdigit() or currChar == ".":
             tempChar = currChar
             if i == len(string)-1:
                 digit += tempChar
@@ -97,9 +111,10 @@ def shuntingYard(string):
                        break
                     else:
                        tempChar = string[i]
-                i -= 1 # i dont know why but this makes the program work
-                
-            output.append(digit)
+                i -= 1 
+            if digit == ".":
+                raise Exception("Error: Lone Decimal Point Found")
+            output.append(str(float(digit)))
             digit = ""
             decFound = False
             
@@ -112,13 +127,12 @@ def shuntingYard(string):
                     break
                 else:
                     tempChar = string[i]
-            print(funct)
             if funct in operators:
                 stack.append(funct)
                 functionAdd = True
                 funct = ""
             else:
-                raise Exception("Error: Unknown Fucntion!")
+                raise Exception("Error: Unknown Fucntion!", funct)
                 
         elif currChar in operators:
             
@@ -143,6 +157,7 @@ def shuntingYard(string):
                     break
                 else:
                     output.append(curr)
+                    
             if(foundLeft == False):
                 raise Exception("Parenthesis mismatched")
         else:
@@ -158,8 +173,92 @@ def shuntingYard(string):
         output.append(temp)
     return output
                 
-print(shuntingYard("8.3+1"))           
-                
-print(shuntingYard("1+8.3")) 
 
 
+#evaluation function based off code found from https://www.techiedelight.com/evaluate-given-postfix-expression/
+
+def evalPostfix(exp):
+    """
+            "~",
+        "sin",
+        "cos",
+        "tan",
+        "cot",
+        "arcsin",
+        "arccos",
+        "arctan",
+        "arcctn",
+        "log",
+        "ln",
+ """
+    # base case
+    if not exp:
+        exit(-1)
+ 
+    # create an empty stack
+    stack = []
+ 
+    # traverse the given expression
+    for ch in exp:
+ 
+        # if the current is an operand, push it into the stack
+        if ch.replace(".","",1).isdigit():
+            stack.append(float(ch))
+        elif ch in functions:
+            x = stack.pop()
+            if ch == "~":
+                stack.append(x * -1)
+            if ch == "sin":
+                stack.append(math.sin(x))
+            elif ch == "cos":
+                stack.append(math.cos(x))
+            elif ch == "tan":
+                stack.append(math.tan(x))
+            elif ch == "cot":
+                stack.append((math.cos(x)/math.sin(x)))
+            elif ch == "arcsin":
+                stack.append(math.asin(x))
+            elif ch == "arccos":
+                stack.append(math.acos(x))
+            elif ch == "arctan":
+                stack.append(math.atan(x))
+            elif ch == "arcctg":
+                stack.append((math.acos(x)/math.asin(x)))
+            elif ch == "log":
+                stack.append(math.log10(x))
+            elif ch == "ln":
+                stack.append(math.log(x))
+        # if the current is an operator
+        else:
+            # remove the top two elements from the stack
+            x = stack.pop()
+            y = stack.pop()
+ 
+            # evaluate the expression 'x op y', and push the
+            # result back to the stack
+            if ch == '+':
+                stack.append(y + x)
+            elif ch == '-':
+                stack.append(y - x)
+            elif ch == '*':
+                stack.append(y * x)
+            elif ch == '/':
+                stack.append(y // x)
+            elif ch == "^":
+                stack.append(pow(y,x))
+    
+ 
+    # At this point, the stack is left with only one element, i.e.,
+    # expression result
+    return stack.pop()
+
+#test statement
+#~5.78+~(4-2.23)+sin(0)*cos(1)/(1+tan(2*~ln(~3+2*(1.23+arcsin(1)))))
+
+while 1 > 0:
+    userinput = input("Please Input a Valid Math Expression: ")
+    if "exit" in userinput:
+        break
+    else:
+        evalui = shuntingYard(userinput)
+        print("= ",evalPostfix(evalui))

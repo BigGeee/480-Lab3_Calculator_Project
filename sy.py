@@ -59,6 +59,10 @@ priority = {
         ".": 4,
         "(": 4,
         ")": 4,
+        "{": 4,
+        "}": 4,
+        "[": 4,
+        "]": 4,
         "^": 3,
         "sin":2,
         "cos":2,
@@ -145,7 +149,7 @@ def shuntingYard(string):
                 else:
                     break
             stack.append(op1)
-        elif currChar == "(":
+        elif currChar == "(" or currChar == "{" or currChar == "[":
             stack.append(currChar)
         elif currChar == ")":
             foundLeft = False
@@ -160,6 +164,33 @@ def shuntingYard(string):
                     
             if(foundLeft == False):
                 raise Exception("Parenthesis mismatched")
+        elif currChar == "}":
+            foundLeft = False
+            
+            while len(stack) > 0:
+                curr = stack.pop()
+                if curr == "{":
+                    foundLeft = True
+                    break
+                else:
+                    output.append(curr)
+                    
+            if(foundLeft == False):
+                raise Exception("Parenthesis mismatched")
+        elif currChar == "]":
+            foundLeft = False
+            
+            while len(stack) > 0:
+                curr = stack.pop()
+                if curr == "[":
+                    foundLeft = True
+                    break
+                else:
+                    output.append(curr)
+                    
+            if(foundLeft == False):
+                raise Exception("Parenthesis mismatched")
+        
         else:
             raise Exception("Unknown token: ", currChar)
             
@@ -170,6 +201,10 @@ def shuntingYard(string):
         temp = stack.pop()
         if temp == "(" or temp == ")":
             raise Exception("Parenthesis mismatched")
+        if temp == "[" or temp == "]":
+            raise Exception("Parenthesis mismatched")
+        if temp == "{" or temp == "}":
+            raise Exception("Parenthesis mismatched")
         output.append(temp)
     return output
                 
@@ -178,19 +213,7 @@ def shuntingYard(string):
 #evaluation function based off code found from https://www.techiedelight.com/evaluate-given-postfix-expression/
 
 def evalPostfix(exp):
-    """
-            "~",
-        "sin",
-        "cos",
-        "tan",
-        "cot",
-        "arcsin",
-        "arccos",
-        "arctan",
-        "arcctn",
-        "log",
-        "ln",
- """
+
     # base case
     if not exp:
         exit(-1)
@@ -253,12 +276,25 @@ def evalPostfix(exp):
     return stack.pop()
 
 #test statement
-#~5.78+~(4-2.23)+sin(0)*cos(1)/(1+tan(2*~ln(~3+2*(1.23+arcsin(1)))))
+#-5.78+-(4-2.23)+sin(0)*cos(1)/(1+tan(2*-ln(-3+2*(1.23+arcsin(1)))))
+
+def preProcess(string):
+    string = string.strip()
+
+    if string[0] == "-":
+        string = "~" + string[1:len(string)]
+
+    for i in range(1,len(string)):
+        if string[i] == "-" and (string[i-1] in operators or string[i-1].isalpha() or string[i-1] == "(" or string[i-1] == ")") and i < len(string) - 1:
+            string = string[:i] + "~" + string[i+1:]
+    return string
 
 while 1 > 0:
-    userinput = input("Please Input a Valid Math Expression: ")
+    userinput = input("Please Input a Valid Math Expression or type 'exit' to exit the program: ")
     if "exit" in userinput:
         break
     else:
+        userinput = preProcess(userinput)
+        print(userinput)
         evalui = shuntingYard(userinput)
         print("= ",evalPostfix(evalui))

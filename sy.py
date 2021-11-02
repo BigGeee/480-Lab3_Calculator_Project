@@ -25,6 +25,17 @@ operators = {
         "log",
         "ln",
         }
+
+parenth = {
+    "(",
+    ")",
+    "{",
+    "}",
+    "[",
+    "]"
+
+    }
+
 functions = {
         "~",
         "sin",
@@ -285,7 +296,7 @@ def preProcess(string):
         string = "~" + string[1:len(string)]
 
     for i in range(1,len(string)):
-        if string[i] == "-" and (string[i-1] in operators or string[i-1].isalpha() or string[i-1] == "(" or string[i-1] == ")") and i < len(string) - 1:
+        if string[i] == "-" and (string[i-1] in operators or string[i-1] in parenth) and i < len(string) - 1:
             string = string[:i] + "~" + string[i+1:]
     return string
 

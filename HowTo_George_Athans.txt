@@ -1,0 +1,20 @@
+# 480-Lab3_Calculator_Project
+
+To run the code, make sure python 3.9 is installed on the machine and then open the file.
+Optionally, can be run within Spyder IDE. Only tested on Windows 10.
+
+To evalute a syntactically math expresion, simply type in the expresiion and hit enter for example "2+2" or "1 * 2" or "sin(-50) * 2", optionally, type 'exit'
+and hit enter to exit the program.
+
+Caculator supports integers as well as floating point number, negatvie number, trig functions including sin,cos,tan,cot, 
+arcsin, arccos, arctan, and arcctg as well as logritihmic functions such as log and ln (log is base 10).
+
+
+Important note, implicit multiplaction is not support, a '*' must be included in your entered statement.
+
+
+Test Case Which Ecompasses Scope of Operators.
+
+-5.78+-(4-2.23)+sin(0)*cos(1)/(1+tan(2*-ln(-3+2*(1.23+arcsin(1)))))
+
+Evaluates -7.55 with 2 deciaml places.

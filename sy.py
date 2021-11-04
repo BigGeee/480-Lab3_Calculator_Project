@@ -7,6 +7,8 @@ Created on Wed Oct 27 20:25:22 2021
 
 import math
 
+
+#Sets used to check for valid inputs
 operators = {
         "+",
         "-",
@@ -27,14 +29,13 @@ operators = {
         }
 
 parenth = {
-    "(",
-    ")",
-    "{",
-    "}",
-    "[",
-    "]"
-
-    }
+        "(",
+        ")",
+        "{",
+        "}",
+        "[",
+        "]"
+        }
 
 functions = {
         "~",
@@ -48,7 +49,7 @@ functions = {
         "arcctn",
         "log",
         "ln",
-    }
+        }
 leftAsscoc = {"+","-","*","/"}
 rightAssoc = {
         "~",
@@ -63,9 +64,7 @@ rightAssoc = {
         "log",
         "ln"
         }
-
 priority = {
-    
         "~": 4, #negative operator
         ".": 4,
         "(": 4,
@@ -88,13 +87,12 @@ priority = {
         "*": 2,
         "/": 2,
         "+": 1,
-        "-": 1,
-        
-}
+        "-": 1,     
+        }
 
 
 
-
+#converst valid infix exprresions to postfix
 def shuntingYard(string):
     output = []
     stack = []
@@ -109,6 +107,7 @@ def shuntingYard(string):
         currChar = string[i]
         if currChar == " ":
             continue
+        #Add digit to output queue, supports decimals and digits > 9
         elif currChar.isdigit() or currChar == ".":
             tempChar = currChar
             if i == len(string)-1:
@@ -132,7 +131,7 @@ def shuntingYard(string):
             output.append(str(float(digit)))
             digit = ""
             decFound = False
-            
+        #Check if a valid function is found, if so push to stack
         elif currChar.isalpha():
             tempChar = currChar
             while tempChar.isalpha():
@@ -149,6 +148,7 @@ def shuntingYard(string):
             else:
                 raise Exception("Error: Unknown Fucntion!", funct)
                 
+        #Check if current character is a operator, check left and right associtvity and push to stack.
         elif currChar in operators:
             
             op1 = currChar
@@ -160,8 +160,18 @@ def shuntingYard(string):
                 else:
                     break
             stack.append(op1)
+            
+        #push left parenthesis, curly brace, or bracket to stack
         elif currChar == "(" or currChar == "{" or currChar == "[":
+            
+            """
+            #if previous token is digit or a right brace, parenthesis or bracked, implict multiplication is present, not fully implmented
+            if(i != 0 and (string[i-1].isdigit() or string[i-1] == ")" or string[i-1] == "}" or string[i-1] == "]")):
+                stack.append("*")
+            """
             stack.append(currChar)
+        
+        #check stack until left parenthesis is found, if it isnt there is a parenthesis mismatch error
         elif currChar == ")":
             foundLeft = False
             
@@ -175,6 +185,8 @@ def shuntingYard(string):
                     
             if(foundLeft == False):
                 raise Exception("Parenthesis mismatched")
+                
+        #check stack until left curly brace is found, if it isnt there is a parenthesis mismatch error
         elif currChar == "}":
             foundLeft = False
             
@@ -188,6 +200,8 @@ def shuntingYard(string):
                     
             if(foundLeft == False):
                 raise Exception("Parenthesis mismatched")
+                
+        #check stack until left bracket is found, if it isnt there is a parenthesis mismatch error
         elif currChar == "]":
             foundLeft = False
             
@@ -203,11 +217,13 @@ def shuntingYard(string):
                 raise Exception("Parenthesis mismatched")
         
         else:
+            #if no other statment is hit, token is not valid
             raise Exception("Unknown token: ", currChar)
             
         if(functionAdd == False and digitAdd == False):
             i += 1
             
+    #Check to see if any parenthesis, curly brace, or bracket is left over in the stack, if so parenthesis mismatched error has occured
     while len(stack) > 0:
         temp = stack.pop()
         if temp == "(" or temp == ")":
@@ -221,7 +237,7 @@ def shuntingYard(string):
                 
 
 
-#evaluation function based off code found from https://www.techiedelight.com/evaluate-given-postfix-expression/
+#evaluation function for a postfix expression based off code found from https://www.techiedelight.com/evaluate-given-postfix-expression/
 
 def evalPostfix(exp):
 
@@ -286,26 +302,34 @@ def evalPostfix(exp):
     # expression result
     return stack.pop()
 
-#test statement
-#-5.78+-(4-2.23)+sin(0)*cos(1)/(1+tan(2*-ln(-3+2*(1.23+arcsin(1)))))
 
+
+#Function to strip white spaces and replace the binary "-" with "~" for shunting yard.
 def preProcess(string):
-    string = string.strip()
+    string = string.replace(" ", "")
 
     if string[0] == "-":
         string = "~" + string[1:len(string)]
 
     for i in range(1,len(string)):
-        if string[i] == "-" and (string[i-1] in operators or string[i-1] in parenth) and i < len(string) - 1:
+        if string[i] == "-" and (string[i-1] in operators or string[i-1] in parenth or string[i-1].isalpha()) and i < len(string) - 1:
             string = string[:i] + "~" + string[i+1:]
     return string
+
+
+#test statement
+#-5.78+-(4-2.23)+sin(0)*cos(1)/(1+tan(2*-ln(-3+2*(1.23+arcsin(1)))))
 
 while 1 > 0:
     userinput = input("Please Input a Valid Math Expression or type 'exit' to exit the program: ")
     if "exit" in userinput:
         break
     else:
-        userinput = preProcess(userinput)
-        print(userinput)
-        evalui = shuntingYard(userinput)
-        print("= ",evalPostfix(evalui))
+        try:
+            evalinput = preProcess(userinput)
+           
+            evalui = shuntingYard(evalinput)
+            print(userinput + " = ",evalPostfix(evalui))
+        except Exception as err:
+           print("Uh oh! An error occured! Error: ", err)
+exit(-1)
